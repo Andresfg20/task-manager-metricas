@@ -1,0 +1,18 @@
+# Backend
+src/backend/target/
+*.class
+*.iml
+# Frontend
+src/frontend/node_modules/
+src/frontend/dist/
+src/frontend/coverage/
+src/frontend/.vite/
+# Entorno y secretos
+.env
+# Resultados generados por las herramientas de medición
+metricas/resultados/tmp/
+# IDE y sistema operativo
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
