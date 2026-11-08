@@ -65,11 +65,34 @@ task-manager-metricas/
 
 ## 5. Tecnologías
 
-_Pendiente — sección a cargo de Julio Lozano._
+| Capa | Tecnología |
+|---|---|
+| Backend | Java 21, Spring Boot 3.5.7 (Web, Security, Data JPA, Validation), jjwt 0.12.6, springdoc-openapi 2.8.9 |
+| Base de datos | PostgreSQL 16, Flyway (migraciones), H2 en modo PostgreSQL para pruebas |
+| Frontend | React 18.3, Vite 5.4, React Router 6 |
+| Pruebas | JUnit 5, Mockito, Spring MockMvc, ArchUnit 1.3, JaCoCo 0.8.12, Vitest 2.1, Testing Library, Postman/newman |
+| Métricas | CK (métricas Chidamber & Kemerer), lizard (complejidad ciclomática y LOC) |
+| Infraestructura | Docker, Docker Compose, nginx |
 
 ## 6. Instalación y ejecución
 
-_Pendiente — sección a cargo de Julio Lozano._
+Requisitos: Docker Desktop y Git.
+
+```bash
+git clone https://github.com/Andresfg20/task-manager-metricas.git
+cd task-manager-metricas
+cp .env.example .env          # en PowerShell: Copy-Item .env.example .env
+# Edita .env y define JWT_SECRET (mínimo 32 caracteres) y las contraseñas
+docker compose up --build
+```
+
+| Servicio | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| API | http://localhost:8080/api/v1 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+
+Usuario administrador inicial: el definido en `ADMIN_EMAIL` / `ADMIN_PASSWORD` del archivo `.env`.
 
 ## 7. Métricas aplicadas
 
@@ -81,7 +104,22 @@ _Pendiente — sección a cargo de Juan Horta._
 
 ## 9. Pruebas
 
-_Pendiente — sección a cargo de Julio Lozano._
+| Tipo | Ubicación | Comando |
+|---|---|---|
+| Unitarias backend | `src/backend/src/test/.../service` | `mvn -B verify` (en `src/backend`) |
+| Integración backend | `src/backend/src/test/.../controller/*IT.java` | `mvn -B verify` |
+| Arquitectura | `ArchitectureTest.java` | `mvn -B verify` |
+| Frontend | `src/frontend/src/**/*.test.js(x)` | `npm test` (en `src/frontend`) |
+| API (Postman) | `tests/task-manager.postman_collection.json` | `npx newman run tests/task-manager.postman_collection.json` |
+
+Sin Maven instalado, el backend se prueba con Docker (PowerShell, desde `src/backend`):
+
+```powershell
+docker run --rm -v "${PWD}:/app" -w /app maven:3.9-eclipse-temurin-21 mvn -B verify
+```
+
+El reporte de cobertura queda en `src/backend/target/site/jacoco/index.html` (regla: ≥ 80 % de líneas en los servicios).
+La relación de cada prueba con su requisito está en [docs/trazabilidad.md](docs/trazabilidad.md).
 
 ## 10. Entregables y conclusiones
 
