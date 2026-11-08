@@ -95,12 +95,30 @@ docker compose up --build
 Usuario administrador inicial: el definido en `ADMIN_EMAIL` / `ADMIN_PASSWORD` del archivo `.env`.
 
 ## 7. Métricas aplicadas
-
-_Pendiente — sección a cargo de Juan Horta._
-
+ 
+| Métrica | Tipo | Herramienta | Umbral |
+|---|---|---|---|
+| Complejidad ciclomática V(G) | Estructural | CK, lizard | ≤ 10 por método |
+| LOC / NLOC | Estructural (tamaño) | lizard, CK | ≤ 30 por método |
+| WMC, CBO, RFC, LCOM, DIT, NOC (suite CK) | Diseño OO | CK | WMC ≤ 20, CBO ≤ 10 |
+| Esfuerzo por tipo de mantenimiento | Evolución | Issues de GitHub | Referencia 21/25/50/4 % |
+ 
+Fichas completas en [docs/metricas/fichas.md](docs/metricas/fichas.md). Para medir (requiere Docker):
+ 
+```powershell
+.\metricas\medir.ps1 -Etiqueta antes
+```
+ 
 ## 8. Resultados y refactorización
-
-_Pendiente — sección a cargo de Juan Horta._
+ 
+- 0 métodos con V(G) > 10 y V(G) promedio 1,2. RNF-03 no se cumple a nivel de clase: la entidad `Task` tiene WMC 22 (límite 20),
+  casi todo por accesores; se registra como hallazgo abierto.
+- Elemento refactorizado: `TaskService` (WMC 18 de 20 y CBO 11). Se aplicó **Extraer clase** (`TaskCalendarService`) e
+  **Introducir objeto de valor** (`CalendarRange`).
+- Resultado: en `TaskService`, WMC 18 → 15 (−16,7 %), CBO 11 → 10, RFC 31 → 25 y NLOC 100 → 84. A cambio, el LCOM sube de 2 a 6,
+  el CBO de `TaskController` de 26 a 27 y el total crece 30 NLOC por las clases nuevas.
+Tabla completa (Anexo C) en [docs/metricas/resultados.md](docs/metricas/resultados.md) y detalle en
+[docs/metricas/refactorizacion.md](docs/metricas/refactorizacion.md).
 
 ## 9. Pruebas
 
@@ -122,5 +140,19 @@ El reporte de cobertura queda en `src/backend/target/site/jacoco/index.html` (re
 La relación de cada prueba con su requisito está en [docs/trazabilidad.md](docs/trazabilidad.md).
 
 ## 10. Entregables y conclusiones
-
-_Pendiente — sección a cargo de Juan Horta._
+ 
+| Entregable | Ubicación |
+|---|---|
+| Informe final (PDF) | [docs/informe-final.pdf](docs/informe-final.pdf) |
+| Requisitos y trazabilidad | `docs/requisitos.md`, `docs/trazabilidad.md` |
+| Arquitectura | `docs/arquitectura/` |
+| Fichas y resultados de métricas | `docs/metricas/` |
+| Script de medición | `metricas/` |
+| Versiones | Tags `v0.1.0` a `v1.0.0` y release `v1.0.0` |
+ 
+Conclusiones:
+ 
+1. Medir antes de refactorizar permitió elegir la clase con mayor riesgo con datos y no por intuición.
+2. Una complejidad ciclomática baja no basta: las métricas de diseño (WMC, CBO) muestran concentración de responsabilidades.
+3. La refactorización reduce la complejidad y el acoplamiento de la clase crítica a cambio de un aumento pequeño del tamaño total y de una cohesión algo menor.
+4. Las herramientas tienen límites: CK 0.7.0 no analiza los `record` y, sin las librerías en el classpath, subestima el acoplamiento (CBO).
