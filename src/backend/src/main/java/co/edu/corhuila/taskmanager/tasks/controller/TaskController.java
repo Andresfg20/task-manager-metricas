@@ -27,6 +27,7 @@ import co.edu.corhuila.taskmanager.tasks.dto.TaskRequest;
 import co.edu.corhuila.taskmanager.tasks.dto.TaskResponse;
 import co.edu.corhuila.taskmanager.tasks.dto.TaskStatusRequest;
 import co.edu.corhuila.taskmanager.tasks.entity.TaskStatus;
+import co.edu.corhuila.taskmanager.tasks.service.TaskCalendarService;
 import co.edu.corhuila.taskmanager.tasks.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +35,7 @@ import jakarta.validation.Valid;
 
 /**
  * Task endpoints (07-api/endpoints.md). Holds no business rules: it validates input,
- * passes the authenticated owner id and delegates to TaskService.
+ * passes the authenticated owner id and delegates to TaskService or TaskCalendarService.
  */
 @RestController
 @RequestMapping("/api/v1/tasks")
@@ -42,10 +43,13 @@ import jakarta.validation.Valid;
 public class TaskController {
 
     private final TaskService taskService;
+    private final TaskCalendarService taskCalendarService;
     private final CurrentUser currentUser;
 
-    public TaskController(TaskService taskService, CurrentUser currentUser) {
+    public TaskController(TaskService taskService, TaskCalendarService taskCalendarService,
+            CurrentUser currentUser) {
         this.taskService = taskService;
+        this.taskCalendarService = taskCalendarService;
         this.currentUser = currentUser;
     }
 
@@ -64,7 +68,7 @@ public class TaskController {
     public List<TaskResponse> calendar(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        return taskService.findCalendar(currentUser.id(), from, to);
+        return taskCalendarService.findCalendar(currentUser.id(), from, to);
     }
 
     @GetMapping("/{id}")

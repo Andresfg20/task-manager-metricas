@@ -2,8 +2,6 @@ package co.edu.corhuila.taskmanager.tasks.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import co.edu.corhuila.taskmanager.common.dto.PageResponse;
-import co.edu.corhuila.taskmanager.common.exception.BadRequestException;
 import co.edu.corhuila.taskmanager.common.exception.NotFoundException;
 import co.edu.corhuila.taskmanager.tasks.dto.TaskRequest;
 import co.edu.corhuila.taskmanager.tasks.dto.TaskResponse;
@@ -25,9 +22,6 @@ import co.edu.corhuila.taskmanager.tasks.repository.TaskRepository;
  */
 @Service
 public class TaskService {
-
-    /** A month grid of 6 weeks: the largest range the Calendar View requests. */
-    static final int MAX_CALENDAR_DAYS = 42;
 
     private final TaskRepository taskRepository;
     private final Clock clock;
@@ -89,20 +83,6 @@ public class TaskService {
         var pageable = PageRequest.of(PageResponse.safePage(page), PageResponse.safeSize(size));
         var result = taskRepository.search(ownerId, status, overdueOnly, TaskStatus.PENDING, today, pageable);
         return PageResponse.from(result, task -> TaskResponse.from(task, today));
-    }
-
-    /** Own dated tasks between two dates, inclusive, for the Calendar View (BR-24). */
-    @Transactional(readOnly = true)
-    public List<TaskResponse> findCalendar(UUID ownerId, LocalDate from, LocalDate to) {
-        if (to.isBefore(from) || ChronoUnit.DAYS.between(from, to) + 1 > MAX_CALENDAR_DAYS) {
-            throw new BadRequestException("INVALID_DATE_RANGE",
-                    "'to' must not be before 'from', and the range must cover at most 42 days.");
-        }
-        LocalDate today = today();
-        return taskRepository.findByOwnerIdAndDueDateBetweenOrderByDueDateAscCreatedAtAsc(ownerId, from, to)
-                .stream()
-                .map(task -> TaskResponse.from(task, today))
-                .toList();
     }
 
     private Task getOwnTask(UUID ownerId, UUID taskId) {
