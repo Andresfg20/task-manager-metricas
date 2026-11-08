@@ -20,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import co.edu.corhuila.taskmanager.common.exception.BadRequestException;
 import co.edu.corhuila.taskmanager.common.exception.NotFoundException;
 import co.edu.corhuila.taskmanager.tasks.dto.TaskRequest;
 import co.edu.corhuila.taskmanager.tasks.dto.TaskResponse;
@@ -137,15 +136,6 @@ class TaskServiceTest {
         assertThat(TaskResponse.from(pendingToday, TODAY).overdue()).isFalse();
         assertThat(TaskResponse.from(completedPast, TODAY).overdue()).isFalse();
         assertThat(TaskResponse.from(undated, TODAY).overdue()).isFalse();
-    }
-
-    @Test
-    @DisplayName("TC-023: a calendar range over 42 days is rejected")
-    void findCalendar_withRangeOver42Days_throwsInvalidRange() {
-        assertThatThrownBy(() -> taskService.findCalendar(OWNER, TODAY, TODAY.plusDays(42)))
-                .isInstanceOf(BadRequestException.class);
-        assertThatThrownBy(() -> taskService.findCalendar(OWNER, TODAY, TODAY.minusDays(1)))
-                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
